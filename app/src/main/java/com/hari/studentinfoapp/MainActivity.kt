@@ -1,9 +1,11 @@
 package com.hari.studentinfoapp
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
@@ -14,102 +16,107 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         val dataStoreManager = DataStoreManager(applicationContext)
-
         setContent {
-            StudentInfoApp(dataStoreManager)
+            MaterialTheme {
+                StudentInfoApp(dataStoreManager)
+            }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StudentInfoApp(dataStoreManager: DataStoreManager) {
-    var id by remember { mutableStateOf(TextFieldValue("660")) } // Default ID (last 3 digits of student ID)
+    var id by remember { mutableStateOf(TextFieldValue("660")) }
     var username by remember { mutableStateOf(TextFieldValue("")) }
     var courseName by remember { mutableStateOf(TextFieldValue("")) }
     val scope = rememberCoroutineScope()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        // Input Fields
-        Column {
-            OutlinedTextField(
-                value = id,
-                onValueChange = { id = it },
-                label = { Text("ID") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
-                label = { Text("Username") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
-                value = courseName,
-                onValueChange = { courseName = it },
-                label = { Text("Course Name") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(title = { Text("Student Info") })
+        },
+        content = { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                OutlinedTextField(
+                    value = id,
+                    onValueChange = { id = it },
+                    label = { Text("Student ID") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text("Username") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = courseName,
+                    onValueChange = { courseName = it },
+                    label = { Text("Course Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-            // Buttons
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                val data = dataStoreManager.studentData.first()
+                                id = TextFieldValue(data.id)
+                                username = TextFieldValue(data.username)
+                                courseName = TextFieldValue(data.courseName)
+                            }
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Load")
+                    }
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                dataStoreManager.saveData(id.text, username.text, courseName.text)
+                            }
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Store")
+                    }
+                }
+
                 Button(
                     onClick = {
                         scope.launch {
-                            val data = dataStoreManager.studentData.first() // Load the first emitted value
-                            id = TextFieldValue(data.id)
-                            username = TextFieldValue(data.username)
-                            courseName = TextFieldValue(data.courseName)
+                            dataStoreManager.clearData()
+                            id = TextFieldValue("660")
+                            username = TextFieldValue("")
+                            courseName = TextFieldValue("")
                         }
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Load")
+                    Text("Reset")
                 }
-                Button(
-                    onClick = {
-                        scope.launch {
-                            dataStoreManager.saveData(
-                                id.text,
-                                username.text,
-                                courseName.text
-                            )
-                        }
-                    }
-                ) {
-                    Text("Store")
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(
-                onClick = {
-                    scope.launch {
-                        dataStoreManager.clearData() // Clear DataStore
-                        id = TextFieldValue("660") // Reset to default
-                        username = TextFieldValue("")
-                        courseName = TextFieldValue("")
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(MaterialTheme.colors.error)
-            ) {
-                Text("Reset")
+
+                Text(
+                    "Harikrishnan Parameswaran\n301474660",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
             }
         }
-
-        // About Section
-        Text(
-            "Harikrishnan Parameswaran\n301474660", // Replace with your name and full student ID
-            modifier = Modifier.padding(top = 16.dp)
-        )
-    }
+    )
 }
