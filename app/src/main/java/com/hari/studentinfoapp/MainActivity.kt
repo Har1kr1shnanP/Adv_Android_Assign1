@@ -13,11 +13,14 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+// Entry point
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Initialize DataStoreManager to manage local storage
         val dataStoreManager = DataStoreManager(applicationContext)
         setContent {
+            // Set the theme and launch the main UI
             MaterialTheme {
                 StudentInfoApp(dataStoreManager)
             }
@@ -28,6 +31,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StudentInfoApp(dataStoreManager: DataStoreManager) {
+    // State variables to hold user input
     var id by remember { mutableStateOf(TextFieldValue("660")) }
     var username by remember { mutableStateOf(TextFieldValue("")) }
     var courseName by remember { mutableStateOf(TextFieldValue("")) }
@@ -35,6 +39,7 @@ fun StudentInfoApp(dataStoreManager: DataStoreManager) {
 
     Scaffold(
         topBar = {
+            // Top App Bar with centered title
             CenterAlignedTopAppBar(title = { Text("Student Info") })
         },
         content = { paddingValues ->
@@ -45,18 +50,21 @@ fun StudentInfoApp(dataStoreManager: DataStoreManager) {
                     .padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Input field for Student ID
                 OutlinedTextField(
                     value = id,
                     onValueChange = { id = it },
                     label = { Text("Student ID") },
                     modifier = Modifier.fillMaxWidth()
                 )
+                // Input field for Username
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
                     label = { Text("Username") },
                     modifier = Modifier.fillMaxWidth()
                 )
+                // Input field for Course Name
                 OutlinedTextField(
                     value = courseName,
                     onValueChange = { courseName = it },
@@ -64,10 +72,12 @@ fun StudentInfoApp(dataStoreManager: DataStoreManager) {
                     modifier = Modifier.fillMaxWidth()
                 )
 
+                // Row containing Load and Store buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    // Load button retrieves stored data
                     Button(
                         onClick = {
                             scope.launch {
@@ -82,6 +92,7 @@ fun StudentInfoApp(dataStoreManager: DataStoreManager) {
                     ) {
                         Text("Load")
                     }
+                    // Store button saves input data
                     Button(
                         onClick = {
                             scope.launch {
@@ -95,6 +106,7 @@ fun StudentInfoApp(dataStoreManager: DataStoreManager) {
                     }
                 }
 
+                // Reset button clears stored data and resets input fields
                 Button(
                     onClick = {
                         scope.launch {
@@ -111,6 +123,7 @@ fun StudentInfoApp(dataStoreManager: DataStoreManager) {
                     Text("Reset")
                 }
 
+                // Display student details
                 Text(
                     "Harikrishnan Parameswaran\n301474660",
                     style = MaterialTheme.typography.bodyMedium,
